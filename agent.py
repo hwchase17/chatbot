@@ -1,18 +1,9 @@
 from langchain_anthropic import ChatAnthropic
-from langgraph.graph import END, StateGraph, MessagesState
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langgraph.prebuilt import create_react_agent
 
 model = ChatAnthropic(model="claude-3-5-sonnet-20240620")
 
-graph_workflow = StateGraph(MessagesState)
+tools = [TavilySearchResults(max_results=2)]
 
-
-def agent(state: MessagesState):
-    response = model.invoke(state["messages"])
-    return {"messages": [response]}
-
-
-graph_workflow.add_node(agent)
-graph_workflow.add_edge("agent", END)
-graph_workflow.set_entry_point("agent")
-
-graph = graph_workflow.compile()
+graph = create_react_agent(model, tools)
